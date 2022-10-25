@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: redis-sentinel-demo
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600
+  redis:
+    database: 0
+    sentinel:
+      master: mymaster
+      nodes:
+        - localhost:26379
+        - localhost:26380
+        - localhost:26381
+    lettuce:
+      shutdown-timeout: 200ms

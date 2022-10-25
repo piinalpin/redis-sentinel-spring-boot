@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  redis-master:
+    hostname: redis-master.mylab.local
+    container_name: redis-master
+    image: redis:7.0.5
+    command: >
+      bash -c "echo 'port 26379' > sentinel.conf &&
+      echo 'dir /tmp' >> sentinel.conf &&
+      echo 'sentinel resolve-hostnames yes' >> sentinel.conf &&
+      echo 'sentinel monitor mymaster redis-master.mylab.local 6379 2' >> sentinel.conf &&
+      echo 'sentinel down-after-milliseconds mymaster 5000' >> sentinel.conf &&
+      echo 'sentinel parallel-syncs mymaster 1' >> sentinel.conf &&
+      echo 'sentinel failover-timeout mymaster 5000' >> sentinel.conf &&
+      cat sentinel.conf &&
+      redis-server sentinel.conf --sentinel & 
+      redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru"
+    volumes:
+      - "redis-bitnami-data:/bitnami/redis/data"
+      - "redis-data:/data"
+
+  redis-slave-1:
+    hostname: redis-slave-1.mylab.local
+    container_name: redis-slave-1
+    image: redis:7.0.5
+    command: >
+      bash -c "echo 'port 26379' > sentinel.conf &&
+      echo 'dir /tmp' >> sentinel.conf &&
+      echo 'sentinel resolve-hostnames yes' >> sentinel.conf &&
+      echo 'sentinel monitor mymaster redis-master.mylab.local 6379 2' >> sentinel.conf &&
+      echo 'sentinel down-after-milliseconds mymaster 5000' >> sentinel.conf &&
+      echo 'sentinel parallel-syncs mymaster 1' >> sentinel.conf &&
+      echo 'sentinel failover-timeout mymaster 5000' >> sentinel.conf &&
+      cat sentinel.conf &&
+      redis-server sentinel.conf --sentinel & 
+      redis-server --port 6380 --slaveof redis-master.mylab.local 6379 --maxmemory 256mb --maxmemory-policy allkeys-lru"
+    volumes:
+      - "redis-bitnami-data:/bitnami/redis/data"
+      - "redis-data:/data"
+
+  redis-slave-2:
+    hostname: redis-slave-2.mylab.local
+    container_name: redis-slave-2
+    image: redis:7.0.5
+    command: >
+      bash -c "echo 'port 26379' > sentinel.conf &&
+      echo 'dir /tmp' >> sentinel.conf &&
+      echo 'sentinel resolve-hostnames yes' >> sentinel.conf &&
+      echo 'sentinel monitor mymaster redis-master.mylab.local 6379 2' >> sentinel.conf &&
+      echo 'sentinel down-after-milliseconds mymaster 5000' >> sentinel.conf &&
+      echo 'sentinel parallel-syncs mymaster 1' >> sentinel.conf &&
+      echo 'sentinel failover-timeout mymaster 5000' >> sentinel.conf &&
+      cat sentinel.conf &&
+      redis-server sentinel.conf --sentinel & 
+      redis-server --port 6381 --slaveof redis-master.mylab.local 6379 --maxmemory 256mb --maxmemory-policy allkeys-lru"
+    volumes:
+      - "redis-bitnami-data:/bitnami/redis/data"
+      - "redis-data:/data"
+
+  application:
+    hostname: redis-sentinel-demo
+    container_name: redis-sentinel-demo-app
+    image: piinalpin/redis-sentinel-demo:0.0.1-SNAPSHOT
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  redis-data:
+  redis-bitnami-data:
