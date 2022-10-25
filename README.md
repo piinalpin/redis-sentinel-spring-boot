@@ -1,6 +1,8 @@
 # Spring Boot Redis Sentinel Example
 An example implementation of **Redis Sentinel** usage with Spring Boot
 
+![Redis Sentinel Topology with Application Client](img/redis-sentinel-topology-client.png)
+
 ### Run as Container
 - Build project `mvn clean package -Dmaven.test.skip=true`
 - `docker compose up -d --build`
